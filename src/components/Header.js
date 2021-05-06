@@ -1,17 +1,36 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { auth, provider } from "../firebase";
 import styled from "styled-components";
+import { useHistory } from "react-router-dom";
 import {
   selectUserName,
   selectUserPhoto,
   setUserLogin,
+  setSignOut,
 } from "../features/user/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 function Header() {
   const dispatch = useDispatch();
+  const history = useHistory();
   const userName = useSelector(selectUserName);
   const userPhoto = useSelector(selectUserPhoto);
+
+  useEffect(() => {
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        dispatch(
+          setUserLogin({
+            name: user.displayName,
+            email: user.email,
+            photo: user.photoURL,
+          })
+        );
+        history.push("/");
+      }
+    });
+  }, []);
+
   const signIn = () => {
     //fire base play great role here
     auth.signInWithPopup(provider).then((result) => {
@@ -23,6 +42,14 @@ function Header() {
           photo: user.photoURL,
         })
       );
+      history.push("/");
+    });
+  };
+
+  const signOut = () => {
+    auth.signOut().then(() => {
+      dispatch(setSignOut());
+      history.push("/login");
     });
   };
 
@@ -61,7 +88,7 @@ function Header() {
               <span>SERIES</span>
             </a>
           </NavMenu>
-          <UserImg src={userPhoto} />
+          <UserImg onClick={signOut} src={userPhoto} />
         </>
       )}
     </Nav>

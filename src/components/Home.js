@@ -17,7 +17,6 @@ function Home() {
       });
 
       dispatch(setMovies(tempMovies));
-      //console.log(tempMovies);
     });
   }, []);
 
